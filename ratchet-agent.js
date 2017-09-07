@@ -2,10 +2,10 @@ var exec                = require('child_process').exec;
 var fs                  = require('fs');
 var async               = require('async');
 var networkutils        = require("./networkUtils");
-var ourIPAddress        = networkutils.getFirstAvailableNetworkAddress("enp3s0,wlp2s0");
-var ourMACAddress       = networkutils.getFirstAvailableMACAddress("enp3s0,wlp2s0");
+var ourIPAddress        = networkutils.getFirstAvailableNetworkAddress("eth0,wlan0");
+var ourMACAddress       = networkutils.getFirstAvailableMACAddress("eth0,wlan0");
 var deviceConfig        = JSON.parse(fs.readFileSync("device.config.json", 'utf8'));
-var workingPath         = "/home/aws/gateway-setup/agent/device_startup/";
+var workingPath         = "/home/agent/HeadlessAgent/";
 
 var awsIot = require('aws-iot-device-sdk');
 
@@ -14,26 +14,17 @@ var device = awsIot.device({
 	"port": 8883,
 	"clientId": deviceConfig.thingName,
 	"thingName": deviceConfig.thingName,
-	"caPath": "/home/aws/gateway-setup/agent/device_startup/rootCA.pem",
-	"certPath": "/home/aws/gateway-setup/agent/device_startup/certificate.pem",
-	"keyPath": "/home/aws/gateway-setup/agent/device_startup/privateKey.pem",
+	"caPath": "/home/agent/HeadlessAgent/root-ca.pem",
+	"certPath": "/home/agent/HeadlessAgent/certificate.pem",
+	"keyPath": "/home/agent/HeadlessAgent/privateKey.pem",
   "region": "us-west-2"
 });
 
 function main()
 {
-  log("");
-  log("");
-  log("");
-  log("**********************************************************");
   log("**");
-  log("** Intel NUC - Device Registration");
+  log("** Ratchet Discovery Agent");
   log("**");
-  log("** Version 1.0 [May17]");
-  log("**");
-  log("** Device identified as " + ourMACAddress);
-  log("**");
-  log("**********************************************************");
   log("");
   log("");
 
@@ -54,25 +45,41 @@ function main()
   }
 }
 
+/*
+	Check we have a valid JSON configuration file, if not - ask AWS IoT for an friendly identifier
+*/
+function checkValidConfig()
+{
+	if (deviceConfig.thingName != "RAT-0") return true;
+	else {
+		// We need to ask for a valid RAT #
+		log("We aren't configured, fetching RAT ID");
+		device.subscribe("/rat/configure");
+		var configMe = {
+			mac: ourMACAddress
+		};
+		device.publish("/rat/configure/me", JSON.stringify(configMe));
+	}
+}
+
 function registerDevice(next)
 {
   log(new Date());
+	if (checkValidConfig()) {
+	  log("Registering this Device -> " + ourIPAddress + " [" + ourMACAddress + "]");
 
-  log("Registering this Device -> " + ourIPAddress + " [" + ourMACAddress + "]");
+	  var data =
+	  {
+	    "local-ip" : ourIPAddress,
+	    "local-mac" : ourMACAddress,
+	    "mqtt_topic" : deviceConfig.thingTopic,
+	    "name" : deviceConfig.thingName,
+	    "thing_name" : deviceConfig.thingName,
+	    "last-seen" : new Date()
+	  };
 
-  var data =
-  {
-    "local-ip" : ourIPAddress,
-    "local-mac" : ourMACAddress,
-    "mqtt_topic" : deviceConfig.thingTopic,
-    "name" : deviceConfig.thingName,
-    "thing_name" : deviceConfig.thingName,
-    "last-seen" : new Date()
-  };
-
-  device.publish(deviceConfig.thingTopic, JSON.stringify(data));
-	device.publish('$aws/things/' + deviceConfig.thingName + '/shadow/get', "");
-
+	  device.publish(deviceConfig.thingTopic, JSON.stringify(data));
+	}
 	setTimeout(()=>
         {
           next();
@@ -86,65 +93,27 @@ function log(message)
 
 device.on('message', function(topic,message) {
 
-	// There won't be a shadow for all devices so don't assume we have values
+	// This might be triggered by lots of unknown devices
+	// Verify the message is for us using our mac address
 	console.log("Processing shadow data ...");
 	console.log(message.toString());
 	message = JSON.parse(message);
 	try
 	{
-		var lastRunMessage = "";
-		var lastRunDate = "";
-		var reset = message.state.desired.reset;
-		var downloadFile = message.state.desired.downloadFile;
-		var run = message.state.desired.exec;
-		if (reset)
-		{
-			console.log("Reset requested, running reset script.");
-			// Execute the included reset.sh file
-			exec('chmod a+x reset.sh', function() {});
-			exec('./reset.sh' , function() {});
-			lastRunMessage += "Resetting device.";
-		}
-		if (downloadFile != "")
-		{
-			console.log("Downloading requested file.");
-			exec('wget ' + downloadFile, function() {});
-			lastRunMessage += "Downloaded file: " + downloadFile;
-		}
-		if (run != "")
-		{
-			console.log("Running commands ...");
-			exec(run, function() {});
-			lastRunMessage += "Executed the following: " + run;
-		}
-		lastRunDate = Date.now();
-		var shadow = {
-			"state" : {
-				"desired" : {
-					"lastRunMessage" : lastRunMessage,
-					"lastRunDate" : lastRunDate,
-					"reset" : false,
-					"downloadFile" : "",
-					"exec": ""
-				},
-				"reported" : {
-					"lastRunMessage" : lastRunMessage,
-					"lastRunDate" : lastRunDate,
-					"reset" : false,
-					"downloadFile" : "",
-					"exec": ""
-				}
-			}
-		}
-		// Reset our shadow reporting back messages
-		// Only run if there are return messages
-		if (lastRunMessage != "")
-		{
-			device.publish('$aws/things/' + deviceConfig.thingName + '/shadow/update', JSON.stringify(shadow));
+		if (message.mac == ourMACAddress) {
+			// Write out our new configuration file
+			// This also sets our globals to the new values and so the main loop should run
+			deviceConfig.thingName = message.thingName;
+			deviceConfig.thingTopic = message.thingTopic;
+
+			fs.writefile(workingPath + "device.config.json", JSON.stringify(deviceConfig), 'utf8', function(err) {
+				if (err) log("Unable to save new config file.");
+				else log("Saved new config file.");
+			});
 		}
 	}
-	catch (e) {
-		console.log("No valid shadow found. Err: " + e.toString());
+	catch (Exception err) {
+		log("We had a problem parsing the configure response: " + err);
 	}
 
 });
