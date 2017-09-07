@@ -8,7 +8,7 @@ Restart=always
 RestartSec=60s
 Environment="AVAHI_COMPAT_NOWARN=1"
 WorkingDirectory=/home/agent/HeadlessAgent
-ExecStart=/usr/bin/python /home/pi/SmartCity/smartcity_status_agent.py
+ExecStart=/home/agent/n/bin/node /home/agent/HeadlessAgent/ratchet-agent.js
 
 [Install]
 WantedBy=multi-user.target

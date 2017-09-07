@@ -1,0 +1,19 @@
+{
+  "name": "register-device-lite",
+  "version": "0.0.1",
+  "description": "",
+  "main": "register-device-lite.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Craig Williams",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.1.4"
+  },
+  "devDependencies": {
+    "aws-sdk": "latest",
+    "aws-iot-device-sdk": "latest",
+    "npm": "^2.8.3"
+  }
+}
