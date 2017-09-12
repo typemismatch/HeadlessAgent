@@ -112,7 +112,7 @@ device.on('message', function(topic,message) {
 			});
 		}
 	}
-	catch (Exception err) {
+	catch (err) {
 		log("We had a problem parsing the configure response: " + err);
 	}
 
