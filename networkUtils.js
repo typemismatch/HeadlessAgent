@@ -91,6 +91,7 @@ NetworkUtils.prototype.getLocalIPs = function()
                     localIPInfo[ifaceName] = {};
                 }
                 localIPInfo[ifaceName].IPv6 = addrInfo.address;
+                localIPInfo[ifaceName].MAC  = addrInfo.mac;
             }
         }
     }
