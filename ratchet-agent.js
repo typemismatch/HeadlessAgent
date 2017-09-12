@@ -90,7 +90,7 @@ function registerDevice(next)
 
 function log(message)
 {
-  console.log("register-device-lite:: " + message);
+  console.log("ratchet-agent:: " + message);
 }
 
 device.on('message', function(topic,message) {
@@ -108,7 +108,7 @@ device.on('message', function(topic,message) {
 			deviceConfig.thingName = "RAT-" + message.rat;
 			deviceConfig.thingTopic = "rat/discovery/RAT-" + message.rat;
 
-			fs.writefile(workingPath + "device.config.json", JSON.stringify(deviceConfig), 'utf8', function(err) {
+			fs.writeFile(workingPath + "device.config.json", JSON.stringify(deviceConfig), 'utf8', function(err) {
 				if (err) log("Unable to save new config file.");
 				else log("Saved new config file.");
 			});
@@ -128,8 +128,8 @@ device.on('connect', function() {
   };
   device.publish("nuc/agent", JSON.stringify(message));
   //subscribe to our shadow so we can run the reset agent
-	device.subscribe('$aws/things/' + deviceConfig.thingName + '/shadow/get/accepted');
-	device.publish('$aws/things/' + deviceConfig.thingName + '/shadow/get', "");
+	//device.subscribe('$aws/things/' + deviceConfig.thingName + '/shadow/get/accepted');
+	//device.publish('$aws/things/' + deviceConfig.thingName + '/shadow/get', "");
   setTimeout(()=>
         {
           console.log("Processing into main loop ...");
