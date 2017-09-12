@@ -1,0 +1,3 @@
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games:/home/node-red/$
+N_PREFIX=/home/node-red/n
+HOME=/home/node-red
