@@ -95,7 +95,7 @@ device.on('message', function(topic,message) {
 
 	// This might be triggered by lots of unknown devices
 	// Verify the message is for us using our mac address
-	console.log("Processing shadow data ...");
+	console.log("Processing configure me data ...");
 	console.log(message.toString());
 	message = JSON.parse(message);
 	try
@@ -103,8 +103,8 @@ device.on('message', function(topic,message) {
 		if (message.mac == ourMACAddress) {
 			// Write out our new configuration file
 			// This also sets our globals to the new values and so the main loop should run
-			deviceConfig.thingName = message.thingName;
-			deviceConfig.thingTopic = message.thingTopic;
+			deviceConfig.thingName = "RAT-" + message.rat;
+			deviceConfig.thingTopic = "rat/discovery/RAT-" + message.rat;
 
 			fs.writefile(workingPath + "device.config.json", JSON.stringify(deviceConfig), 'utf8', function(err) {
 				if (err) log("Unable to save new config file.");
