@@ -1,13 +1,13 @@
 {
-  "name": "register-device-lite",
-  "version": "0.0.1",
-  "description": "",
-  "main": "register-device-lite.js",
+  "name": "ratchet-agent",
+  "version": "1.0.0",
+  "description": "Headless configuration agent",
+  "main": "ratchet-agent.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Craig Williams",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "dependencies": {
     "async": "^2.1.4"
   },
