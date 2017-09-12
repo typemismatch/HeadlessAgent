@@ -26,7 +26,6 @@ function main()
   log("** Ratchet Discovery Agent");
   log("**");
   log("");
-  log("");
 
   var bootTime = new Date().getTime();
 
@@ -138,4 +137,4 @@ device.on('connect', function() {
   console.log('Pushed awake message to gateway...');
 });
 
-main();
+//main();
