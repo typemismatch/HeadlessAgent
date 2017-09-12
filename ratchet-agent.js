@@ -106,7 +106,7 @@ device.on('message', function(topic,message) {
 			// Write out our new configuration file
 			// This also sets our globals to the new values and so the main loop should run
 			deviceConfig.thingName = "RAT-" + message.rat;
-			deviceConfig.thingTopic = "rat/discovery/RAT-" + message.rat;
+			deviceConfig.thingTopic = "/rat/discovery/RAT-" + message.rat;
 
 			fs.writeFile(workingPath + "device.config.json", JSON.stringify(deviceConfig), 'utf8', function(err) {
 				if (err) log("Unable to save new config file.");
@@ -126,7 +126,7 @@ device.on('connect', function() {
     "agent-id": deviceConfig.thingName,
     "agent-status": "Online, waiting for IP discovery"
   };
-  device.publish("nuc/agent", JSON.stringify(message));
+  device.publish("/rat/agent", JSON.stringify(message));
   //subscribe to our shadow so we can run the reset agent
 	//device.subscribe('$aws/things/' + deviceConfig.thingName + '/shadow/get/accepted');
 	//device.publish('$aws/things/' + deviceConfig.thingName + '/shadow/get', "");
