@@ -14,7 +14,7 @@ var device = awsIot.device({
 	"port": 8883,
 	"clientId": deviceConfig.thingName,
 	"thingName": deviceConfig.thingName,
-	"caPath": "/home/agent/HeadlessAgent/root-ca.pem",
+	"caPath": "/home/agent/HeadlessAgent/rootCA.pem",
 	"certPath": "/home/agent/HeadlessAgent/certificate.pem",
 	"keyPath": "/home/agent/HeadlessAgent/privateKey.pem",
   "region": "us-west-2"
@@ -58,7 +58,9 @@ function checkValidConfig()
 		var configMe = {
 			mac: ourMACAddress
 		};
-		device.publish("/rat/configure/me", JSON.stringify(configMe));
+		setTimeout(()=>{
+			device.publish("/rat/configure/me", JSON.stringify(configMe));
+		}, 1000);
 	}
 }
 
