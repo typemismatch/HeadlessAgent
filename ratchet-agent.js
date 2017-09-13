@@ -51,8 +51,7 @@ function main()
 function checkValidConfig()
 {
 	// if actual mac and last known mac don't match, the SD card was swapped, ask for reconfiguration
-	if (deviceConfig.lastMAC != ourMACAddress) return false;
-	if (deviceConfig.thingName != "RAT-0") return true;
+	if (deviceConfig.thingName != "RAT-0" && deviceConfig.lastMAC == ourMACAddress) return true;
 	else {
 		// We need to ask for a valid RAT #
 		log("We aren't configured, fetching RAT ID");
