@@ -3,7 +3,8 @@ var fs                  = require('fs');
 var async               = require('async');
 var networkutils        = require("./networkUtils");
 var ourIPAddress        = networkutils.getFirstAvailableNetworkAddress("eth0,wlan0");
-var ourMACAddress       = networkutils.getFirstAvailableMACAddress("eth0,wlan0");
+//var ourMACAddress       = networkutils.getFirstAvailableMACAddress("eth0,wlan0");
+var ourMACAddress       = fs.readFileSync("/sys/class/net/eth0/address"); // os.networkInterfaces fails on this node
 var deviceConfig        = JSON.parse(fs.readFileSync("device.config.json", 'utf8'));
 var workingPath         = "/home/agent/HeadlessAgent/";
 
