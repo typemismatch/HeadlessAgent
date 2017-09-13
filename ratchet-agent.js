@@ -51,7 +51,7 @@ function main()
 function checkValidConfig()
 {
 	// if actual mac and last known mac don't match, the SD card was swapped, ask for reconfiguration
-	if (deviceConfig.mac != ourMACAddress) return false;
+	if (deviceConfig.lastMAC != ourMACAddress) return false;
 	if (deviceConfig.thingName != "RAT-0") return true;
 	else {
 		// We need to ask for a valid RAT #
@@ -109,7 +109,7 @@ device.on('message', function(topic,message) {
 			// This also sets our globals to the new values and so the main loop should run
 			deviceConfig.thingName = "RAT-" + message.rat;
 			deviceConfig.thingTopic = "/rat/discovery/RAT-" + message.rat;
-			deviceConfig.mac = ourMACAddress;
+			deviceConfig.lastMAC = ourMACAddress;
 
 			fs.writeFile(workingPath + "device.config.json", JSON.stringify(deviceConfig), 'utf8', function(err) {
 				if (err) log("Unable to save new config file.");
