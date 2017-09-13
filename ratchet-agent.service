@@ -1,14 +1,14 @@
 [Unit]
-Description=Service to launch node-red program
+Description=Ratchet Discovery Agent
+Wants=network-online.target
+After=network-online.target
 
 [Service]
-User=node-red
-Group=node-red
-ExecStart=/home/node-red/n/bin/node /home/node-red/node_modules/node-red/red.js
-WorkingDirectory=/home/node-red/node_modules
-Restart=on-failure
-KillSignal=SIGINT
-EnvironmentFile=/home/node-red/Environment
+Restart=always
+RestartSec=60s
+Environment="AVAHI_COMPAT_NOWARN=1"
+WorkingDirectory=/home/agent/HeadlessAgent
+ExecStart=/home/agent/n/bin/node /home/agent/HeadlessAgent/ratchet-agent.js
 
 [Install]
 WantedBy=multi-user.target
